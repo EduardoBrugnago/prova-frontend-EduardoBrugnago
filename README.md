@@ -131,7 +131,25 @@ E as de desenvolvimento:
 | `@testing-library/react` + `@testing-library/jest-dom` + `@testing-library/user-event` | teste de componente e o `renderHook` que citei na **Questão 2** |
 | `prettier` + `eslint-config-prettier` | formataçao automatica, com o config desligando as regras de estilo do ESLint pra um nao brigar com o outro |
 
+### Configuraçao do tema e componentes genericos
 
+Como nao tem mockup, peguei so uma paleta de cor simples e configurei algumas variaçoes de fonts que eu usei em alguns projetos recentes e peguei um modelo que eu tenho pronto de tema do MUI e so coloquei as cores e fonts nele. 
+
+Pra iniciar o mapeamento dos componentes genericos, primeiro listei oq é preciso para um CRUD, que vai ser:
+
+Input, Button, Skeleton, Table, Pagination.
+
+Desses cinco, o Button já vem pronto do MUI e o tema em `generic/theme` já padroniza ele (sem caixa alta, sem elevação), então não precisa de componente próprio. Os outros repetem comportamento em toda tela de CRUD e viram genéricos em `generic/components`:
+
+| Componente | O que resolve | Onde entra |
+|---|---|---|
+| Input | Ligar o campo ao `react-hook-form` e joga o erro do Zod embaixo do campo | Login e cadastros |
+| Tabela | Receber as colunas e forma de renderizar as linhas; 3 estados: carregando, vazio e erro | Listagem de produto e de usuário |
+| Skeleton | Tabela com o mesmo número de coluna e de linha da página, pra primeira carga não dar troca de layout | Uso na tabela com `isLoading` |
+| Paginação | Paginação generica com "Anterior / Próximo" e Seleçao de pagina | Rodapé da tabela |
+| Modal | Confirmação de ação | Exclusão de produto e de usuário |
+
+Vai ser preciso dois hooks em `generic`: `useDebounce`, pro filtro de nome não disparar uma request a cada tecla, e `useDisclosure`, pro controle de abrir e fechar do modal.
 
 ## Uso de IA
 
