@@ -107,3 +107,49 @@ Algumas coisas que eu costumo priorizar:
 5. **Componente pequeno e sem prop drilling:** evito sempre prop por tres niveis, soluçao é sempre store/contexto, ou a composiçao ta errada;
 
 6. **Env:** tudo por `.env` e variavel de ambiente, com o arquivo fora do versionamento.
+
+
+## Uso de IA
+
+Uso IA como ferramenta de apoio, principalmente pra levantar opção e acelerar pesquisa, mas a decisão e a justificativa continuam sendo minhas, todo retorno que usei aqui eu validei antes de adotar. Abaixo o registro dos pontos onde usei durante a prova.
+
+### Escolha da API pública
+
+Antes de começar a Parte 2 eu precisava achar uma API pública dava conta do enunciado inteiro, pra nao descobrir no meio do caminho que faltava algo. Prompt que usei:
+
+```
+Preciso de uma API REST de CRUD pública e gratuita pra um teste técnico de front-end.
+A aplicação precisa ter:
+- tela de listagem
+- cadastro, edição e exclusão
+- paginação
+- filtro
+- validação de formulário
+- feedback visual de sucesso e erro das operações
+- autenticação, se possível
+
+Quais opções atendem isso e qual você recomenda?
+```
+
+Voltaram duas opções viáveis:
+
+| | Platzi Fake Store API | DummyJSON |
+|---|---|---|
+| Listagem | sim | sim |
+| Cadastro / edição / exclusão | persiste de verdade | responde 200 mas nao salva |
+| Paginação | `offset` + `limit` | `skip` + `limit` |
+| Filtro por nome | `?title=` | `/products/search?q=` |
+| Faixa de preço | `?price_min=` e `?price_max=` | nao tem |
+| Categorias pro filtro | `/categories` | sim |
+| Autenticação | JWT com access + refresh | JWT |
+| Erro 400 com campo | sim | raramente |
+
+Escolhi a **Platzi** por 3 motivos:
+
+1. Por ter mais opçao de filtro o que facilita controle de paginaçao.
+
+2. Pelo CRUD persistir. Na DummyJSON o `POST` e o `PUT` respondem 200
+mas nao salvam nada e ainda devolve 400 com o campo que falhou, que é o que alimenta o erro inline no formulário
+
+3. Tem `/auth` com access e refresh token de verdade, ai fica melhor que criar uma estrutura so por mockup.
+
