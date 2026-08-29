@@ -113,7 +113,7 @@ Algumas coisas que eu costumo priorizar:
 
 ### Escolha das libs
 
-Como API publica escolhi a Platzi Fake Store API, ela tem disponivel Autenticação e 2 CRUDS (Produtos e Usuarios). Depois disso montei a stack seguindo oq respondi na **Parte 1**, pra mostrar a implementaçao teorica na pratica.
+Como API publica escolhi a Platzi Fake Store API, ela tem disponivel Autenticação e 2 CRUDS (Produtos e Usuarios). Depois disso montei a stack seguindo oq respondi na **Parte 1**, pra mostrar a implementaçao teorica na pratica. [IA 1](#1-escolha-da-api-pública)
 
 | Pacote | Onde entra |
 |---|---|
@@ -151,11 +151,72 @@ Desses cinco, o Button já vem pronto do MUI e o tema em `generic/theme` já pad
 
 Vai ser preciso dois hooks em `generic`: `useDebounce`, pro filtro de nome não disparar uma request a cada tecla, e `useDisclosure`, pro controle de abrir e fechar do modal.
 
+### Estrutura de pastas
+
+Montei usando o conceito que passei *Parte 1**, três camadas, cada uma com uma responsabilidade: `services/` pra API, `modules/` para rota e tela, `generic/` items de uso multiplo. A dependência é unidirecional ,`services/` nunca importa de `modules/`. [IA 2](#2-árvore-de-pastas-no-readme)
+
+```
+src/
+│
+├── app/                        # infraestrutura
+│   ├── config/                 # env e permissões
+│   ├── providers/              # Redux + tema + router + toast
+│   ├── router/                 # rotas e os guards de auth
+│   ├── store/                  # configureStore, hooks tipados e controle de erro
+│   └── App.tsx
+│
+├── services/                   # API
+│   ├── api/                    # axios, interceptors e o axiosBaseQuery
+│   ├── auth/
+│   ├── products/               # cada pasta com client, endpoints, DTO e a api do RTKQ
+│   ├── categories/
+│   └── users/
+│
+├── modules/                    # Modulos/Dominios
+│   ├── auth/
+│   │   ├── components/
+│   │   │   └── LoginForm/
+│   │   ├── hooks/
+│   │   ├── model/
+│   │   ├── pages/
+│   │   │   └── LoginPage/      # index da(s) pagina(s) desse modulo
+│   │   └── store/
+│   ├── products/
+│   │   ├── components/         # componentes do domínio (tabela, form, filtros)
+│   │   ├── mappers/            # DTO <-> modelo de domínio
+│   │   ├── model/              # tipos e regras, sem React
+│   │   ├── pages/
+│   │   └── store/              # slice de filtro e seleção
+│   ├── categories/
+│   │   ├── hooks/
+│   │   ├── mappers/
+│   │   └── model/
+│   └── users/
+│       ├── hooks/
+│       ├── mappers/
+│       └── model/
+│
+├── generic/                    # Uso espalhado pelos modules
+│   ├── components/             # Input, Tabela, Skeleton, Paginação, Confirmação
+│   ├── hooks/                  # useDebounce, useDisclosure
+│   ├── theme/
+│   │   ├── colors.ts           # paleta de cor
+│   │   ├── fonts.ts            # família, peso e escala de tamanho
+│   │   ├── theme.ts            # tema do MUI
+│   │   └── index.ts
+│   └── utils/
+│
+├── assets/
+├── index.css
+└── main.tsx
+```
+
+
 ## Uso de IA
 
-Uso IA como ferramenta de apoio, principalmente pra levantar opção e acelerar pesquisa, mas a decisão e a justificativa continuam sendo minhas, todo retorno que usei aqui eu validei antes de adotar. Abaixo o registro dos pontos onde usei durante a prova.
+Uso IA como ferramenta de apoio, principalmente pra levantar opção e acelerar pesquisa, mas a decisão e a justificativa continuam sendo minhas, todo retorno que usei aqui eu validei antes de adotar. Abaixo o registro dos pontos onde usei durante a prova. Cada uso está numerado aqui embaixo e marcado com `[IA n]` no ponto do README onde ele entrou.
 
-### Escolha da API pública
+### 1. Escolha da API pública
 
 Antes de começar a Parte 2 eu precisava achar uma API pública dava conta do enunciado inteiro, pra nao descobrir no meio do caminho que faltava algo. Prompt que usei:
 
@@ -195,3 +256,13 @@ mas nao salvam nada e ainda devolve 400 com o campo que falhou, que é o que ali
 
 3. Tem `/auth` com access e refresh token de verdade, ai fica melhor que criar uma estrutura so por mockup.
 
+### 2. Árvore de pastas no README
+
+Com as pastas já criadas, quis deixar melhor a escrita no README pra explicar a separação das camadas e desenhar isso em texto fica mais rapido por IA. Prompt que usei:
+
+```
+Leia a estrutura de pastas de `src/` e escreva em markdown uma seção com
+essa árvore, com foco em leitura e apenas com: bloco de código, indentação.
+```
+
+O retorno é o bloco da seção [Estrutura de pastas](#estrutura-de-pastas). Conferi as pasta e adicionei alguns comentarios nelas pra ficar facil de compreender.
