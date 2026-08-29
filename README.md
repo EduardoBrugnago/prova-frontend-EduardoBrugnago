@@ -109,6 +109,30 @@ Algumas coisas que eu costumo priorizar:
 6. **Env:** tudo por `.env` e variavel de ambiente, com o arquivo fora do versionamento.
 
 
+## Parte 2 e 3: Api e Interface
+
+### Escolha das libs
+
+Como API publica escolhi a Platzi Fake Store API, ela tem disponivel Autenticação e 2 CRUDS (Produtos e Usuarios). Depois disso montei a stack seguindo oq respondi na **Parte 1**, pra mostrar a implementaçao teorica na pratica.
+
+| Pacote | Onde entra |
+|---|---|
+| `@reduxjs/toolkit` + `react-redux` | store em `app/store`, slices de estado de interface em `modules/*/store` e as APIs do RTK Query em `services/` |
+| `axios` | cliente HTTP do `axiosBaseQuery` em `services/api`, pra centralizar o attach do token, o refresh e a normalizaçao de erro |
+| `react-router-dom` | rotas em `app/router` e o Guard das rotas |
+| `@mui/material` + `@emotion/react` + `@emotion/styled` + `@mui/icons-material` | É um Design Sistem com bastante opçao que eu ja tenho bastante experiencia. Vou usar o tema em `generic/theme` e os componentes genericos em `generic/components` |
+| `react-hook-form` + `zod` + `@hookform/resolvers` | Tambem são libs que tenho bastante experiencia e bem simples de implementar pra esse escopo. Validaçao dos formularios de login e de produto, com erro inline por campo |
+
+E as de desenvolvimento:
+
+| Pacote | Pra que |
+|---|---|
+| `vitest` + `jsdom` | runner dos testes de hook e util, ja encaixa direto com o Vite do projeto |
+| `@testing-library/react` + `@testing-library/jest-dom` + `@testing-library/user-event` | teste de componente e o `renderHook` que citei na **Questão 2** |
+| `prettier` + `eslint-config-prettier` | formataçao automatica, com o config desligando as regras de estilo do ESLint pra um nao brigar com o outro |
+
+
+
 ## Uso de IA
 
 Uso IA como ferramenta de apoio, principalmente pra levantar opção e acelerar pesquisa, mas a decisão e a justificativa continuam sendo minhas, todo retorno que usei aqui eu validei antes de adotar. Abaixo o registro dos pontos onde usei durante a prova.
