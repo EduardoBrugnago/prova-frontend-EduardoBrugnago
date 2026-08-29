@@ -57,12 +57,53 @@ Explique como você estruturaria um projeto React de médio/grande porte para fa
 
 > Componentização;
 
+Esse processo depende de como esta o andamento do time de design, no mundo perfeito que é entregado o manual de fonts e cores, ai eu sigo o seguinte fluxo: Inicio configurando arquivos de tema do projeto, separando cores, fonts, padroes de textos. Esse arquivos normalmente seguindo a base de um Design System pra utilizar eles. Depois eu normalmente separo em duas categorias de componentes:
+
+1. Componentes genericos: Aqueles que tem multipla utilizaçao nas diferentes paginas e normalmente são padronizados. Por exemplo: Inputs, Buttons, Tables, Titles, Skeletons, Drawers, Modals, etc.)
+
+2. Componentes de pagina: São os que tem uso exclusivo de uma pagina, que nao tem utilização em nenhuma outra. Por exemplo: Um card de produto, que é exibido em um grid de loja. Um filtro contruido com Inputs genericos.
+
+Inicio com os genericos utilizando sempre os temas configurados, pra evitar variaçao de cores, fonts e tamanhos, para depois contruir as paginas utilizando eles e nesse processo ir criando os componentes de pagina pra suprir oq nao tem nos genericos. Eu faço nesse fluxo porque agiliza o desenvolvimento em primeiro ter todas ferramentas basicas montadas e ir plotando de maneira agil multiplas telas. Alem disso essa separaçao de tema e componentes genericos, fica mais facil para manutenção e modificações de identidade do projeto, ja que tudo fica centralizado, caso precise trocar palleta do projeto ou algum outro aspecto visual, fica mais agil e facil de ajustar e encontrar os arquivos.
+
+
 > Hooks customizados;
+
+Apos montar o mockup das paginas, ai começo a verificar as rotas da api e de que maneira vou criar os hooks de acordo com as regra de negócio, é ai ligo o serviço com a tela. Seguindo oq comentei na **Questão 1** (`Apresentação <- Hook <- Serviço`), tento estruturar o hook como intermediario: ele chama o serviço, trata o retorno, aplica oq a regra pede (filtro, calculo, ordenaçao, formataçao) e devolve pro componente só aquilo que ele precisa exibir. Assim a pagina importa um hook só e nao tem responsabilidade alem de exibir o dado ou um input.
+
+Na estrutura eu separo eles em dois lugares igual os componentes: os que tem rota/dominio ficam dentro do proprio modulo/pagina, e os que nao tem nada de dominio ficam na pasta de genericos igual os componentes, tipo `useDebounce`, `useDisclosure`, `usePagination`, `useLocalStorage`. Dependendo das bibliotecas, tipo o **RTK Query**, ela ja gera os hooks de request (`useGetProductsQuery`), mas normalmente eu nao uso ele direto na tela, envolvo num hook do modulo (`useProductsList`) pra manter o ponto de mudança centralizado. Se o backend mudar ou eu precisar trocar a fonte do dado, muda só dentro daquele hook e evita quebrar algum componente.
+
 
 > Reutilização de código;
 
+A reutilização eu tento resolver primeiro pelo tema e pelos genericos, que é oq comentei. Tudo que nao é preso a um dominio vai pra `generic/` (components, hooks, utils, theme) e oq é do dominio fica dentro de `modules/`. Isso tambem pros tipos e DTOs, que ficam junto do serviço em `services/`, entao o mesmo tipo é usado pelo hook, pelo componente e pelo teste, sem redeclarar interface por conta propria. Outro ponto forte de reuso é o `axiosBaseQuery` que tbm citei na **Questão 1**: token, refresh e normalizaçao de erro escritos uma vez só e herdados por todos os serviços.
+
+Mas eu evito abstrair cedo demais. Normalmente só promovo alguma coisa pra `generic/` depois que ela ja apareceu em dois ou tres lugares diferentes, pra evitar virar aquele componente com 15 props que ninguem entende mais. Prefiro repetir um pouco no começo e generalizar depois, quando ja da pra enxergar oq realmente varia.
+
+
 > Separação entre regras de negócio e interface;
+
+Esse ponto eu ja toquei na **Questão 1**', ele aparece na propria estrutura de pastas. `services/` cuida da API, `modules/` guarda a regra e o estado, e o componente só recebe prop e renderiza. Formataçao (moeda, data, mascara) eu deixo como um util generico e o hook ja entrega o valor pronto pra exibir. Isso ajuda em dois momentos: quando o design muda, mexo só no componente e o comportamento continua igual; e quando a regra muda, mexo só no hook e nenhuma tela precisa ser tocada. Fora que agiliza bastante testes, porque a maior parte do que pode quebrar fica em funçao pura e hook, sem precisar renderizar nada pra validar.
+
 
 > Estratégias para testes;
 
+Como a regra fica isolada em hook e util, o grosso do teste é unitario ali, usando **Vitest + Testing Library** pro que precisa de render. Pros hooks da pra usar `renderHook` resolve bem, e nos utils é teste puro de entrada e saida, que é facil de escrever e roda rapido.
+
+Pra parte de integraçao com as APIs normalmente nao uso mock de rede, prefiro validar com a API de verdade. Antes de escrever o serviço eu exploro os endpoints no Postman (ou no Swagger, quando o backend disponibiliza) pra ver a resposta real, o formato do erro. Ja os estados de loading e de erro eu verifico direto no navegador. Com throttling de banda da pra ver o Skeleton e conferir se nao tem layout shift, e no modo Offline da pra ver o caminho de erro de rede, o toast e o retry funcionando. Tbm bloqueando so uma request especifica pra simular falha parcial tambem.
+
+
 > Boas práticas que costuma seguir.
+
+Algumas coisas que eu costumo priorizar:
+
+1. **TypeScript sem `any` e `undefined`:** tipo vindo do serviço e nao redeclarado na tela, com o strict ligado;
+
+2. **Lint e formataçao automatizados:** ESLint + Prettier configurados no projeto e rodando no commit, pra facilitar leitura de merge review;
+
+3. **Padrão de nome e de pasta:** o mesmo nome do dominio repetido em `services/`, `modules/` e na rota;
+
+4. **Commits e PRs pequenos:** o foco é sempre tentar atomizar os commits deixando eles pequenos, as vezes nao tem escapatoria principalmente em configuraçao base de projeto, mas a ideia é sempre tentar minimizar pra ter um review mais simples;
+
+5. **Componente pequeno e sem prop drilling:** evito sempre prop por tres niveis, soluçao é sempre store/contexto, ou a composiçao ta errada;
+
+6. **Env:** tudo por `.env` e variavel de ambiente, com o arquivo fora do versionamento.
