@@ -6,6 +6,28 @@ Analisando as 5 partes que eram solicitadas no documento, tomei a decisão de te
 
 ## Instruções de Execução
 
+Requer **Node 20.19+ ou 22.12+**. Desenvolvido no Node 24.
+
+```bash
+npm install
+cp .env.example .env.local   # opcional, o projeto tem fallback pra mesma URL
+npm run dev
+```
+
+A aplicaçao sobe em `http://localhost:5173` e abre no login, porque `/products` e rota protegida.
+
+**Credencial de teste:** `emilys` / `emilyspass`
+
+| Script            | O que faz                                       |
+| ----------------- | ----------------------------------------------- |
+| `npm run dev`     | servidor de desenvolvimento                     |
+| `npm run build`   | checagem de tipo (`tsc -b`) e build de produçao |
+| `npm run preview` | serve o build gerado                            |
+| `npm run lint`    | ESLint                                          |
+| `npm run format`  | Prettier em tudo                                |
+
+A unica variavel de ambiente e a `VITE_API_URL`, que aponta pra `https://dummyjson.com`. O `.env.local` fica fora do versionamento, por isso o `.env.example` versionado e o fallback em `app/config/env.ts` — sem nenhum dos dois o projeto ainda sobe. [IA 4](#4-instruções-de-execução)
+
 ## Parte 1: Arquitetura de front-end
 
 ### Questão 1
@@ -233,6 +255,78 @@ O filtro de preço e a paginaçao moram em `modules/products/model/product.rules
 
 O cadastro ficou de fora, o `POST` sai de verdade e a API responde 201, mas o produto nao existe no server.Optei por retornar so com o toast de sucesso, pra nao gerar confusao na listagem e ediçao.
 
+## Parte 4: Pergunta de Perfil
+
+### Questão 5
+
+> **Conte sobre um projeto (profissional, acadêmico ou pessoal) que considera representar melhor seu nível técnico. Qual foi sua participação e quais foram os principais desafios?**
+
+Um projeto que considero representar bem meu nível técnico foi o desenvolvimento do aplicativo da Bewiki, que desenvolvi em 2024, uma plataforma que funcionava como um HUB de serviços integrados a condomínios, permitindo aos usuários contratar serviços como coworking, moradia, atendimento médico e alimentação.
+
+Atuei como desenvolvedor pleno em uma equipe composta por um gestor, três desenvolvedores Front-end, dois Back-end e uma equipe de QA. Fui responsável principalmente pelo desenvolvimento e integração dos métodos de pagamento, além dos sistemas de contratação de coworking e imóveis. O aplicativo era desenvolvido em React Native, utilizando TypeScript, Redux e ApiSauce, e por ser um projeto legado, um dos principais desafios era trabalhar com uma base de código já existente enquanto o modelo de negócio do cliente estava em constante evolução, ai sempre foi necessario adaptar funcionalidades para atender novas necessidades ou prevenir problemas de operaçao deles que surgiam.
+
+Considero que esse projeto representa bem meu nível técnico justamente pela combinação entre desenvolvimento de funcionalidades complexas, integração com serviços externos, manutenção de um sistema legado e a responsabilidade de atuar com maior autonomia dentro da equipe.
+
+> **Descreva uma tecnologia, linguagem ou ferramenta que precisou aprender recentemente. Como foi esse processo?**
+
+Recentemente, comecei a trabalhar em um projeto de pesquisa para a UFSC que utiliza o Google Earth Engine (GEE) para análise de imagens de satélite. Precisei aprender tanto a utilizar o GEE integrado a uma aplicação ReactJS, quanto conceitos relacionados à análise e interpretação de imagens de satélite, como bandas espectrais e a nomenclatura utilizada na área. Para isso, utilizei principalmente a documentação oficial do Google, analisei o código legado do projeto e fiz bastante experimentação, utilizando tanto o GEE diretamente quanto ferramentas como o QGIS.
+
+Por já ter experiência com JavaScript e React.js, a parte de integração e desenvolvimento foi relativamente tranquila. O principal desafio foi entender os conceitos específicos de análise costeira
+
+> **Como você utiliza ferramentas de IA no seu dia a dia? Em quais situações elas ajudam mais e em quais prefere não utilizá-las?**
+
+Utilizo ferramentas de IA principalmente como apoio ao desenvolvimento. No dia a dia, uso para auxiliar em reviews de merge, documentação, criação de tipagens, análise de possíveis refatorações, criação de testes e também para pesquisar opções de bibliotecas e ferramentas.
+
+Acredito que ela ajuda principalmente em tarefas repetitivas, como criação de tipagens, identificação de duplicação de codigo e revisão de trechos de codigo. É uma ferramenta util pra reduzir o tempo gasto em tarefas mais mecânicas e focar mais na solução do problema.
+
+Prefiro não utilizar a IA como substituta do meu entendimento tecnico. Normalmente leio a documentação e o codigo existente para entender o contexto e só depois utilizo a IA como uma ferramenta de apoio. Assim consigo avaliar melhor as sugestões e validar se a solução realmente faz sentido, em vez de simplesmente aplicar o que foi gerado.
+
+> **Existe alguma prática de desenvolvimento ou engenharia de software que você considera essencial em equipes de alta qualidade? Explique o motivo.**
+
+Acho que Code Review é uma prática essencial, principalmente para qualidade. Para mim, ele não serve apenas para identificar bugs, mas também para manter comunicaçao e troca de conhecimento/perspectiva entre os desenvolvedores, atraves de discutir decisões técnicas antes que elas cheguem à produção.
+
+## Parte 5: Portfólio
+
+### Questão 6
+
+**Repositório principal:** [https://codigos.ufsc.br/loc/cassie](https://codigos.ufsc.br/loc/cassie)
+**Equipe:** [https://cassiecore.paginas.ufsc.br/equipe-atual/](https://cassiecore.paginas.ufsc.br/equipe-atual/)
+
+### Sobre o projeto: CASSIE CoRe®
+
+**Qual problema resolve**
+
+O objetivo geral deste projeto é definir metodologia técnica e operacional e desenvolver uma plataforma web que disponibilize serviço de informação derivada de satélite e inteligência artificial (e.g. linha de costa, topografia, batimetria, compressão costeira, hidrodinâmica) para criação de acervo aplicados à mitigação e adaptação da zona costeira a mudanças do clima.
+
+**Principais decisões técnicas**
+
+- **Adaptação de scripts do Google Earth Engine e de rotinas em Python para módulos
+  de aplicação.** O material de origem era código de análise escrito para execução
+  pontual, não para rodar dentro de um produto. Converti isso em módulos de análise
+  de linha de costa e de estimativa de profundidade de maré com interface e ciclo de
+  vida definidos.
+- **Separação dos novos módulos com fronteiras explícitas, em vez de seguir o padrão
+  do código legado.** O restante do projeto compartilhava estado e componentes de
+  forma difusa, o que tornava qualquer alteração arriscada. Optei por isolar os
+  módulos novos, estado próprio e dependência mínima do que era compartilhado,
+  aceitando alguma duplicação em troca de manutenibilidade e de poder evoluir cada
+  análise sem efeito colateral nos demais módulos.
+
+**O que eu faria diferente hoje**
+
+Trataria o refactor dos módulos legados como parte do escopo, e não como algo
+posterior. Isolar o novo resolveu o problema imediato, mas manteve essa diferença de base entre alguns modulos.
+Os dois pontos que eu faria primeiro são a camada de componentes compartilhados e o uso do Redux,
+hoje aplicado sem uma separação clara entre estado de servidor e estado de interface, apenas como uma forma de cache.
+
+**Maior desafio**
+
+Implementar melhorias em módulos antigos como o **Intermare**. Como o estado era manipulado
+diretamente e a componentização não seguia limites de responsabilidade, mudanças
+pontuais afetavam outros modulos. Foi necessário mapear o fluxo de dados existente
+antes de qualquer alteração , o que consumiu mais tempo de leitura de código do que de escrita.
+Alem disso o codigo era muito denso e nao separava funçao pura de interface, de maneira que dificultava a leitura dos arquivos.
+
 ## Uso de IA
 
 Uso IA como ferramenta de apoio, principalmente pra levantar opção e acelerar pesquisa, mas a decisão e a justificativa continuam sendo minhas, todo retorno que usei aqui eu validei antes de adotar. Abaixo o registro dos pontos onde usei durante a prova. Cada uso está numerado aqui embaixo e marcado com `[IA n]` no ponto do README onde ele entrou.
@@ -302,3 +396,15 @@ quais arquivos ficam intactos, e onde os contratos das duas APIs divergem.
 ```
 
 O retorno virou a lista de arquivos e a estimativa que usei pra decidir. Antes de escrever qualquer DTO eu bati todos os contratos com `curl`. Duas coisas que so apareceram nesse teste e nao estavam no retorno: credencial errada volta 400 em vez de 401, e busca e categoria sao endpoints que nao combinam.
+
+### 4. Instruções de Execução
+
+Com o projeto ja fechado, o que faltava era descrever como rodar. Como e informaçao que ja esta toda no repositorio, pedi pra ler e montar a seçao. Prompt que usei:
+
+```
+Le o package.json, o .env.example e a configuraçao do Vite desse projeto e escreve
+a seçao "Instruções de Execução" do README: versao minima do Node, passo a passo
+pra rodar, tabela dos scripts e as variaveis de ambiente.
+```
+
+O retorno é a seção [Instruções de Execução](#instruções-de-execução). Conferi cada dado na fonte: a versao minima do Node saiu do `engines` do proprio Vite, os scripts do `package.json` e a variavel do `.env.example`.
