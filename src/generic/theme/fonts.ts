@@ -10,14 +10,14 @@ const weights = {
 };
 
 const sizes = {
-  extraSmall: '0.625rem', 
+  extraSmall: '0.625rem',
   smaller: '0.75rem',
-  small: '0.875rem', 
-  regular: '1rem', 
-  medium: '1.125rem', 
-  large: '1.375rem', 
-  larger: '1.5rem', 
-  extraLarge: '2.625rem', 
+  small: '0.875rem',
+  regular: '1rem',
+  medium: '1.125rem',
+  large: '1.375rem',
+  larger: '1.5rem',
+  extraLarge: '2.625rem',
 };
 
 const fonts = {
