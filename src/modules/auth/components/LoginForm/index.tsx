@@ -5,6 +5,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import Stack from '@mui/material/Stack';
@@ -16,8 +17,9 @@ import type { LoginFormValues } from '../../model/loginSchema';
 
 export interface LoginFormProps {
   onSubmit: (values: LoginFormValues) => void;
+  isSubmitting?: boolean;
 }
-function LoginForm({ onSubmit }: LoginFormProps) {
+function LoginForm({ onSubmit, isSubmitting = false }: LoginFormProps) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const { control, handleSubmit } = useForm<LoginFormValues>({
@@ -36,6 +38,7 @@ function LoginForm({ onSubmit }: LoginFormProps) {
           autoComplete="email"
           fullWidth
           autoFocus
+          disabled={isSubmitting}
         />
 
         <Input
@@ -45,6 +48,7 @@ function LoginForm({ onSubmit }: LoginFormProps) {
           type={isPasswordVisible ? 'text' : 'password'}
           autoComplete="current-password"
           fullWidth
+          disabled={isSubmitting}
           slotProps={{
             input: {
               endAdornment: (
@@ -67,7 +71,14 @@ function LoginForm({ onSubmit }: LoginFormProps) {
           }}
         />
 
-        <Button type="submit" variant="contained" size="large" fullWidth>
+        <Button
+          type="submit"
+          variant="contained"
+          size="large"
+          fullWidth
+          disabled={isSubmitting}
+          startIcon={isSubmitting ? <CircularProgress size={16} color="inherit" /> : undefined}
+        >
           Entrar
         </Button>
       </Stack>

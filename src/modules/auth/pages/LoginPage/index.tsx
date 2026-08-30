@@ -1,10 +1,25 @@
+import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
-
+import { useNavigate } from 'react-router-dom';
+import { routePaths } from '../../../../app/router/routePaths';
 import LoginForm from '../../components/LoginForm';
+import { useLogin } from '../../hooks';
+import type { LoginFormValues } from '../../model/loginSchema';
 
 function LoginPage() {
+  const navigate = useNavigate();
+  const { signIn, isLoading, error } = useLogin();
+
+  async function handleSubmit(values: LoginFormValues) {
+    const signedIn = await signIn(values);
+
+    if (signedIn) {
+      navigate(routePaths.products, { replace: true });
+    }
+  }
+
   return (
     <Box sx={{ minHeight: '100vh', display: 'grid', placeItems: 'center', p: 2 }}>
       <Paper
@@ -22,11 +37,17 @@ function LoginPage() {
           </Typography>
 
           <Typography variant="body2" color="text.secondary">
-            Acesse com a sua conta.
+            Acesse com a sua conta pra gerenciar o catálogo de produtos.
           </Typography>
         </Box>
 
-        <LoginForm onSubmit={() => {}} />
+        {error ? (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {error}
+          </Alert>
+        ) : null}
+
+        <LoginForm onSubmit={handleSubmit} isSubmitting={isLoading} />
       </Paper>
     </Box>
   );

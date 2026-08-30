@@ -1,11 +1,10 @@
-import LoginPage from '../modules/auth/pages/LoginPage';
-import ProductsPage from '../modules/products/pages/ProductsPage';
 import AppProviders from './providers/AppProviders';
+import AppRoutes from './router/routes';
 
 function App() {
   return (
     <AppProviders>
-      <LoginPage />
+      <AppRoutes />
     </AppProviders>
   );
 }
