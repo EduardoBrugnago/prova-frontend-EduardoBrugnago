@@ -196,6 +196,18 @@ src/
 └── main.tsx
 ```
 
+### Autenticaçao e Guard
+
+O fluxo do login e: troca a credencial por `access_token` e `refresh_token`, guarda o refresh, busca o `/auth/profile` e so entao marca a sessao como autenticada.
+
+| Decisao | Por que |
+| --- | --- |
+| Tres interceptors em `services/api`: anexar token, refresh com fila e normalizaçao de erro | ponto unico pra cada uma das tres coisas. E o `normalizeError` tratar as mensagens de erro |
+| Refresh com fila, e nao um refresh por chamada | evitar que 401 de multiplas chamadas pedirem refresh e o invalidar o token da proxima request, deslogando o usuario |
+| `authBridge` em vez do interceptor importar o store | o interceptor precisa do token que esta no store. Com essa ponte o `services/` nunca importe de `modules/` |
+
+O Guard é o `ProtectedRoute` em `app/router` - rota protegida sem sessao manda pro `/login` e o `PublicRoute` faz o contrario, devolve quem ja esta logado pra rota que tentou abrir. 
+
 ## Uso de IA
 
 Uso IA como ferramenta de apoio, principalmente pra levantar opção e acelerar pesquisa, mas a decisão e a justificativa continuam sendo minhas, todo retorno que usei aqui eu validei antes de adotar. Abaixo o registro dos pontos onde usei durante a prova. Cada uso está numerado aqui embaixo e marcado com `[IA n]` no ponto do README onde ele entrou.
