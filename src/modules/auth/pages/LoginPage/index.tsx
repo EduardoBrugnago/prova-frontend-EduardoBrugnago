@@ -37,7 +37,11 @@ function LoginPage() {
           </Typography>
 
           <Typography variant="body2" color="text.secondary">
-            Acesse com a sua conta pra gerenciar o catálogo de produtos.
+            Acesse com a sua conta.
+          </Typography>
+
+          <Typography variant="caption" color="text.secondary">
+            Credencial de teste: <strong>emilys</strong> / <strong>emilyspass</strong>
           </Typography>
         </Box>
 

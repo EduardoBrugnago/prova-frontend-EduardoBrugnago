@@ -4,11 +4,18 @@ import { refreshStorage } from '../../modules/auth/storage';
 import { sessionEnded, tokensRenewed } from '../../modules/auth/store/authSlice';
 import { authBridge } from '../../services/api';
 import { authApi, refreshSession } from '../../services/auth';
+import { categoriesApi } from '../../services/categories';
+import { productsApi } from '../../services/products';
 import { rootReducer } from './rootReducer';
 
 export const store = configureStore({
   reducer: rootReducer,
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(authApi.middleware),
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(
+      authApi.middleware,
+      productsApi.middleware,
+      categoriesApi.middleware,
+    ),
 });
 
 authBridge.register({
@@ -24,10 +31,10 @@ authBridge.register({
     }
 
     const tokens = await refreshSession(savedToken);
-    refreshStorage.set(tokens.refresh_token);
-    store.dispatch(tokensRenewed({ accessToken: tokens.access_token }));
+    refreshStorage.set(tokens.refreshToken);
+    store.dispatch(tokensRenewed({ accessToken: tokens.accessToken }));
 
-    return tokens.access_token;
+    return tokens.accessToken;
   },
 
   onSessionExpired: () => {

@@ -10,6 +10,7 @@ export interface PaginationProps {
   page: number;
   pageSize: number;
   hasNextPage: boolean;
+  totalPages?: number;
   onPageChange: (page: number) => void;
   onPageSizeChange?: (pageSize: number) => void;
   pageSizeOptions?: number[];
@@ -20,12 +21,18 @@ function Pagination({
   page,
   pageSize,
   hasNextPage,
+  totalPages,
   onPageChange,
   onPageSizeChange,
   pageSizeOptions = [10, 20, 50],
   disabled = false,
 }: PaginationProps) {
   const hasPreviousPage = page > 1;
+  // a pagina atual entra na lista mesmo se o total encolheu, senao o Select fica sem valor
+  const pageOptions =
+    totalPages === undefined
+      ? []
+      : Array.from({ length: Math.max(totalPages, page) }, (_, index) => index + 1);
 
   return (
     <Box
@@ -41,11 +48,12 @@ function Pagination({
     >
       {onPageSizeChange ? (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant="body2" color="text.secondary" component="label" htmlFor="page-size">
+          <Typography variant="body2" color="text.secondary" component="span" id="page-size-label">
             Itens por página
           </Typography>
           <Select
             id="page-size"
+            labelId="page-size-label"
             size="small"
             value={pageSize}
             disabled={disabled}
@@ -63,9 +71,36 @@ function Pagination({
       )}
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <Typography variant="body2" color="text.secondary">
-          Página {page}
-        </Typography>
+        {totalPages === undefined ? (
+          <Typography variant="body2" color="text.secondary">
+            Página {page}
+          </Typography>
+        ) : (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="body2" color="text.secondary" component="span" id="page-label">
+              Página
+            </Typography>
+
+            <Select
+              id="page"
+              labelId="page-label"
+              size="small"
+              value={page}
+              disabled={disabled}
+              onChange={(event) => onPageChange(Number(event.target.value))}
+            >
+              {pageOptions.map((option) => (
+                <MenuItem key={option} value={option}>
+                  {option}
+                </MenuItem>
+              ))}
+            </Select>
+
+            <Typography variant="body2" color="text.secondary">
+              de {totalPages}
+            </Typography>
+          </Box>
+        )}
         <IconButton
           size="small"
           aria-label="Página anterior"

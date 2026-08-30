@@ -23,12 +23,12 @@ interface ApiErrorBody {
   message?: string | string[];
 }
 
-// So usa mensagem do servidor quando ela diz algo que nao esta coberto.
+// So usa mensagem do servidor quando ela vem como lista
 function extractMessage(kind: ErrorKind, body: ApiErrorBody | undefined): string | undefined {
   if (kind !== 'validation') return undefined;
-  if (!body?.message) return undefined;
+  if (!Array.isArray(body?.message)) return undefined;
 
-  return Array.isArray(body.message) ? body.message.join(' ') : body.message;
+  return body.message.join(' ');
 }
 
 // trata o status da requisiçao, e devolver normalizado sem 401/404/etc.

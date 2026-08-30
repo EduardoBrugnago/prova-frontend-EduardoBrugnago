@@ -1,17 +1,15 @@
-import type { Credentials, AuthUser, UserRole } from '../model/session';
 import type { LoginPayloadDTO, ProfileDTO } from '../../../services/auth';
+import type { AuthUser, Credentials } from '../model/session';
 
 export const toAuthUser = (dto: ProfileDTO): AuthUser => ({
   id: dto.id,
-  name: dto.name,
+  name: `${dto.firstName} ${dto.lastName}`.trim(),
+  username: dto.username,
   email: dto.email,
-  role: toUserRole(dto.role),
-  avatar: dto.avatar,
+  avatar: dto.image,
 });
 
-const toUserRole = (role: string): UserRole => (role === 'admin' ? 'admin' : 'customer');
-
 export const toLoginPayload = (credentials: Credentials): LoginPayloadDTO => ({
-  email: credentials.email,
+  username: credentials.username,
   password: credentials.password,
 });

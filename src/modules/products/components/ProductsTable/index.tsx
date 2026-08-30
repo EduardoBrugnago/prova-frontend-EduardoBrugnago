@@ -14,6 +14,7 @@ import type { TableColumn } from '../../../../generic/components/DataTable';
 import Pagination from '../../../../generic/components/Pagination';
 import { formatCurrency } from '../../../../generic/utils';
 import type { Product } from '../../model/product';
+import type { SortDirection, SortField } from '../../model/product.rules';
 
 export interface ProductsTableProps {
   products: Product[];
@@ -24,10 +25,14 @@ export interface ProductsTableProps {
   page: number;
   pageSize: number;
   hasNextPage: boolean;
+  totalPages?: number;
   onPageChange: (page: number) => void;
   onPageSizeChange: (pageSize: number) => void;
   onEdit: (product: Product) => void;
   onDelete: (product: Product) => void;
+  sortBy?: SortField | null;
+  sortDirection?: SortDirection;
+  onSortChange?: (field: SortField) => void;
 }
 
 function ProductsTable({
@@ -39,21 +44,35 @@ function ProductsTable({
   page,
   pageSize,
   hasNextPage,
+  totalPages,
   onPageChange,
   onPageSizeChange,
   onEdit,
   onDelete,
+  sortBy = null,
+  sortDirection = 'asc',
+  onSortChange,
 }: ProductsTableProps) {
   const columns = useMemo<TableColumn<Product>[]>(
     () => [
       {
         key: 'name',
         header: 'Produto',
+        sortKey: 'name',
+        width: '45%',
         render: (product) => (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Avatar
               variant="rounded"
-              sx={{ width: 36, height: 36, bgcolor: 'primary.light', fontSize: '0.875rem' }}
+              src={product.thumbnail}
+              alt=""
+              sx={{
+                width: 90,
+                height: 90,
+                flexShrink: 0,
+                bgcolor: 'background.default',
+                fontSize: '0.875rem',
+              }}
             >
               {product.name.charAt(0).toUpperCase()}
             </Avatar>
@@ -61,7 +80,17 @@ function ProductsTable({
               <Typography variant="body2" noWrap sx={{ fontWeight: 600 }}>
                 {product.name}
               </Typography>
-              <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block' }}>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{
+                  display: '-webkit-box',
+                  WebkitBoxOrient: 'vertical',
+                  WebkitLineClamp: 2,
+                  overflow: 'hidden',
+                  wordBreak: 'break-word',
+                }}
+              >
                 {product.description}
               </Typography>
             </Box>
@@ -71,17 +100,35 @@ function ProductsTable({
       {
         key: 'category',
         header: 'Categoria',
+        sortKey: 'category',
         width: 180,
         render: (product) => <Chip size="small" label={product.category.name} />,
       },
       {
         key: 'price',
         header: 'Preço',
+        sortKey: 'price',
         align: 'right',
         width: 140,
         render: (product) => (
           <Typography variant="body2" sx={{ fontWeight: 600 }}>
             {formatCurrency(product.price)}
+          </Typography>
+        ),
+      },
+      {
+        key: 'stock',
+        header: 'Estoque',
+        sortKey: 'stock',
+        align: 'right',
+        width: 110,
+        render: (product) => (
+          <Typography
+            variant="body2"
+            color={product.stock === 0 ? 'error' : 'text.primary'}
+            sx={{ fontWeight: product.stock === 0 ? 600 : 400 }}
+          >
+            {product.stock}
           </Typography>
         ),
       },
@@ -121,6 +168,9 @@ function ProductsTable({
   return (
     <DataTable
       label="Lista de produtos"
+      sortBy={sortBy}
+      sortDirection={sortDirection}
+      onSortChange={onSortChange ? (key) => onSortChange(key as SortField) : undefined}
       columns={columns}
       rows={products}
       getRowKey={(product) => product.id}
@@ -135,6 +185,7 @@ function ProductsTable({
           page={page}
           pageSize={pageSize}
           hasNextPage={hasNextPage}
+          totalPages={totalPages}
           onPageChange={onPageChange}
           onPageSizeChange={onPageSizeChange}
           disabled={isLoading}

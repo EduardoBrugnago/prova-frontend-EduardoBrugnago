@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 
 import AddIcon from '@mui/icons-material/Add';
 import Box from '@mui/material/Box';
@@ -7,44 +7,57 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 
 import ConfirmDialog from '../../../../generic/components/ConfirmDialog';
+import { useCategoryOptions } from '../../../categories';
 import { useDisclosure } from '../../../../generic/hooks';
 import ProductFormDialog from '../../components/ProductFormDialog';
-import ProductsFilters, { ALL_CATEGORIES } from '../../components/ProductsFilters';
-import type { CategoryFilter } from '../../components/ProductsFilters';
+import ProductsFilters from '../../components/ProductsFilters';
 import ProductsTable from '../../components/ProductsTable';
+import { useProductFilters, useProductMutations, useProductsList } from '../../hooks';
 import type { Product } from '../../model/product';
-import { mockCategories, mockProducts } from '../../model/product.mock';
+import type { ProductFormValues } from '../../model/productSchema';
 
 function ProductsPage() {
-  const products = mockProducts;
-
-  const [search, setSearch] = useState('');
-  const [categoryId, setCategoryId] = useState<CategoryFilter>(ALL_CATEGORIES);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const { filters, setName, setPriceMin, setPriceMax, setSort, setPage, setPageSize, clear } =
+    useProductFilters();
+  const { categories } = useCategoryOptions();
+  const { products, hasNextPage, totalPages, isLoading, isFetching, error, refetch } =
+    useProductsList();
+  const { save, remove, isSaving, isDeleting } = useProductMutations();
 
   const formDialog = useDisclosure<Product>();
   const deleteDialog = useDisclosure<Product>();
 
-  const handleCreate = useCallback(() => formDialog.open(), [formDialog]);
+  const handleSave = useCallback(
+    async (values: ProductFormValues) => {
+      const saved = await save(values, formDialog.data);
 
-  const handleEdit = useCallback((product: Product) => formDialog.open(product), [formDialog]);
-
-  const handleDelete = useCallback(
-    (product: Product) => deleteDialog.open(product),
-    [deleteDialog],
+      if (saved) {
+        formDialog.close();
+      }
+    },
+    [save, formDialog],
   );
 
-  const handleConfirmDelete = useCallback(() => {
+  const handleConfirmDelete = useCallback(async () => {
     const removing = deleteDialog.data;
 
     if (!removing) {
       return;
     }
-  }, [deleteDialog]);
+
+    const removed = await remove(removing);
+
+    if (removed) {
+      if (products.length === 1 && filters.page > 1) {
+        setPage(filters.page - 1);
+      }
+
+      deleteDialog.close();
+    }
+  }, [remove, deleteDialog, products.length, filters.page, setPage]);
 
   return (
-    <Box sx={{ minHeight: '100vh', py: { xs: 3, md: 5 } }}>
+    <Box sx={{ py: { xs: 3, md: 5 } }}>
       <Container maxWidth="lg">
         <Box
           sx={{
@@ -56,49 +69,50 @@ function ProductsPage() {
             mb: 3,
           }}
         >
-          <Box>
-            <Typography variant="h2" component="h1" gutterBottom>
-              Produtos
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {products.length} produto(s) no resultado atual
-            </Typography>
-          </Box>
+          <Typography variant="h2" component="h1">
+            Produtos
+          </Typography>
 
-          <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreate}>
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => formDialog.open()}>
             Novo produto
           </Button>
         </Box>
 
         <ProductsFilters
-          search={search}
-          categoryId={categoryId}
-          categories={mockCategories}
-          onSearchChange={setSearch}
-          onCategoryChange={() => {}}
-          onClear={() => {}}
-          disabled={false}
+          search={filters.name}
+          priceMin={filters.priceMin}
+          priceMax={filters.priceMax}
+          onSearchChange={setName}
+          onPriceMinChange={setPriceMin}
+          onPriceMaxChange={setPriceMax}
+          onClear={clear}
         />
 
         <ProductsTable
           products={products}
-          isLoading={false}
-          isFetching={false}
-          page={page}
-          pageSize={pageSize}
-          hasNextPage={true}
-          onPageChange={() => {}}
-          onPageSizeChange={() => {}}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
+          isLoading={isLoading}
+          isFetching={isFetching}
+          error={error}
+          onRetry={refetch}
+          page={filters.page}
+          pageSize={filters.pageSize}
+          hasNextPage={hasNextPage}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+          sortBy={filters.sortBy}
+          sortDirection={filters.sortDirection}
+          onSortChange={setSort}
+          onEdit={formDialog.open}
+          onDelete={deleteDialog.open}
         />
 
         <ProductFormDialog
           open={formDialog.isOpen}
           product={formDialog.data}
-          categories={mockCategories}
-          isSubmitting={false}
-          onSubmit={() => {}}
+          categories={categories}
+          isSubmitting={isSaving}
+          onSubmit={handleSave}
           onClose={formDialog.close}
         />
 
@@ -108,7 +122,7 @@ function ProductsPage() {
           description={`O produto "${deleteDialog.data?.name ?? ''}" vai ser removido permanentemente. Tem certeza que deseja continuar?`}
           confirmLabel="Excluir"
           confirmColor="error"
-          isLoading={false}
+          isLoading={isDeleting}
           onConfirm={handleConfirmDelete}
           onClose={deleteDialog.close}
         />

@@ -21,14 +21,14 @@ export function useLogin() {
       try {
         const tokens = await login(toLoginPayload(credentials)).unwrap();
 
-        refreshStorage.set(tokens.refresh_token);
-        dispatch(tokensRenewed({ accessToken: tokens.access_token }));
+        refreshStorage.set(tokens.refreshToken);
+        dispatch(tokensRenewed({ accessToken: tokens.accessToken }));
 
         const profile = await dispatch(
           authApi.endpoints.getProfile.initiate(undefined, { forceRefetch: true }),
         ).unwrap();
 
-        dispatch(sessionStarted({ accessToken: tokens.access_token, user: toAuthUser(profile) }));
+        dispatch(sessionStarted({ accessToken: tokens.accessToken, user: toAuthUser(profile) }));
 
         return true;
       } catch (caught) {
@@ -44,11 +44,11 @@ export function useLogin() {
   return { signIn, isLoading, error };
 }
 
-// "401: credencial errada" o interceptor foi configurado pra logado, aqui gera uma mensagem pra essa situaçao de deslogado
 function toLoginMessage(caught: unknown): string {
   if (!isAppError(caught)) {
     return 'Não foi possível entrar. Tente de novo.';
   }
 
-  return caught.kind === 'auth' ? 'E-mail ou senha inválidos.' : caught.message;
+  const wrongCredentials = caught.kind === 'auth' || caught.kind === 'validation';
+  return wrongCredentials ? 'Usuário ou senha inválidos.' : caught.message;
 }

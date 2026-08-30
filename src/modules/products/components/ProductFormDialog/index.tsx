@@ -13,6 +13,7 @@ import Stack from '@mui/material/Stack';
 import { useForm } from 'react-hook-form';
 
 import Input from '../../../../generic/components/Input';
+import ThumbnailField from '../ThumbnailField';
 import type { Product, ProductCategory } from '../../model/product';
 import { productSchema } from '../../model/productSchema';
 import type { ProductFormValues } from '../../model/productSchema';
@@ -20,7 +21,9 @@ import type { ProductFormValues } from '../../model/productSchema';
 const emptyValues: ProductFormValues = {
   name: '',
   price: '',
-  categoryId: '',
+  category: '',
+  stock: '',
+  thumbnail: '',
   description: '',
 };
 
@@ -32,7 +35,9 @@ function toFormValues(product: Product | null): ProductFormValues {
   return {
     name: product.name,
     price: String(product.price),
-    categoryId: String(product.category.id),
+    category: product.category.slug,
+    stock: String(product.stock),
+    thumbnail: product.thumbnail,
     description: product.description,
   };
 }
@@ -94,13 +99,24 @@ function ProductFormDialog({
               }}
             />
 
-            <Input name="categoryId" control={control} label="Categoria" select fullWidth>
+            <Input
+              name="stock"
+              control={control}
+              label="Estoque"
+              type="number"
+              fullWidth
+              slotProps={{ htmlInput: { min: 0, step: 1 } }}
+            />
+
+            <Input name="category" control={control} label="Categoria" select fullWidth>
               {categories.map((category) => (
-                <MenuItem key={category.id} value={String(category.id)}>
+                <MenuItem key={category.slug} value={category.slug}>
                   {category.name}
                 </MenuItem>
               ))}
             </Input>
+
+            <ThumbnailField control={control} disabled={isSubmitting} />
 
             <Input
               name="description"

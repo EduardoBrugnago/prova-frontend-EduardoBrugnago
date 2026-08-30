@@ -35,16 +35,16 @@ export const restoreSession = createAsyncThunk<RestoredSession>(
     }
 
     const tokens = await refreshSession(savedToken);
-    refreshStorage.set(tokens.refresh_token);
+    refreshStorage.set(tokens.refreshToken);
 
     // o token tem que estar no store antes do profile, para o interceptor
-    dispatch(tokensRenewed({ accessToken: tokens.access_token }));
+    dispatch(tokensRenewed({ accessToken: tokens.accessToken }));
 
     const profile = await dispatch(
       authApi.endpoints.getProfile.initiate(undefined, { forceRefetch: true }),
     ).unwrap();
 
-    return { accessToken: tokens.access_token, user: toAuthUser(profile) };
+    return { accessToken: tokens.accessToken, user: toAuthUser(profile) };
   },
 );
 

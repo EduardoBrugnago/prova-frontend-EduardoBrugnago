@@ -8,6 +8,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { Theme } from '../../generic/theme';
 import { store } from '../store';
 import SessionGate from './SessionGate';
+import ToastProvider from './ToastProvider';
 
 export interface AppProvidersProps {
   children: ReactNode;
@@ -18,9 +19,11 @@ function AppProviders({ children }: AppProvidersProps) {
     <ReduxProvider store={store}>
       <ThemeProvider theme={Theme.Light}>
         <CssBaseline />
-        <BrowserRouter>
-          <SessionGate>{children}</SessionGate>
-        </BrowserRouter>
+        <ToastProvider>
+          <BrowserRouter>
+            <SessionGate>{children}</SessionGate>
+          </BrowserRouter>
+        </ToastProvider>
       </ThemeProvider>
     </ReduxProvider>
   );

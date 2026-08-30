@@ -9,15 +9,19 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import TableSortLabel from '@mui/material/TableSortLabel';
 import Typography from '@mui/material/Typography';
 
 import TableSkeleton from '../TableSkeleton';
+
+export type SortDirection = 'asc' | 'desc';
 
 export interface TableColumn<TRow> {
   key: string;
   header: ReactNode;
   align?: 'left' | 'center' | 'right';
   width?: number | string;
+  sortKey?: string;
   render: (row: TRow) => ReactNode;
 }
 
@@ -33,6 +37,9 @@ export interface DataTableProps<TRow> {
   skeletonRows?: number;
   footer?: ReactNode;
   label?: string;
+  sortBy?: string | null;
+  sortDirection?: SortDirection;
+  onSortChange?: (sortKey: string) => void;
 }
 
 function DataTable<TRow>({
@@ -47,6 +54,9 @@ function DataTable<TRow>({
   skeletonRows = 5,
   footer,
   label,
+  sortBy = null,
+  sortDirection = 'asc',
+  onSortChange,
 }: DataTableProps<TRow>) {
   const showSkeleton = isLoading && !error;
   const showEmpty = !isLoading && !error && rows.length === 0;
@@ -61,8 +71,23 @@ function DataTable<TRow>({
         <TableHead>
           <TableRow>
             {columns.map((column) => (
-              <TableCell key={column.key} align={column.align} sx={{ width: column.width }}>
-                {column.header}
+              <TableCell
+                key={column.key}
+                align={column.align}
+                sx={{ width: column.width }}
+                sortDirection={column.sortKey && sortBy === column.sortKey ? sortDirection : false}
+              >
+                {column.sortKey && onSortChange ? (
+                  <TableSortLabel
+                    active={sortBy === column.sortKey}
+                    direction={sortBy === column.sortKey ? sortDirection : 'asc'}
+                    onClick={() => onSortChange(column.sortKey as string)}
+                  >
+                    {column.header}
+                  </TableSortLabel>
+                ) : (
+                  column.header
+                )}
               </TableCell>
             ))}
           </TableRow>

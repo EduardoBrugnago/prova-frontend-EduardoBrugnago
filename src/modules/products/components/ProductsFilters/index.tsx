@@ -3,36 +3,31 @@ import SearchIcon from '@mui/icons-material/Search';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import InputAdornment from '@mui/material/InputAdornment';
-import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
 import TextField from '@mui/material/TextField';
 
-import type { ProductCategory } from '../../model/product';
-
-export const ALL_CATEGORIES = 'all';
-
-export type CategoryFilter = number | typeof ALL_CATEGORIES;
-
 export interface ProductsFiltersProps {
   search: string;
-  categoryId: CategoryFilter;
-  categories: ProductCategory[];
+  priceMin: string;
+  priceMax: string;
   onSearchChange: (search: string) => void;
-  onCategoryChange: (categoryId: CategoryFilter) => void;
+  onPriceMinChange: (price: string) => void;
+  onPriceMaxChange: (price: string) => void;
   onClear: () => void;
   disabled?: boolean;
 }
 
 function ProductsFilters({
   search,
-  categoryId,
-  categories,
+  priceMin,
+  priceMax,
   onSearchChange,
-  onCategoryChange,
+  onPriceMinChange,
+  onPriceMaxChange,
   onClear,
   disabled = false,
 }: ProductsFiltersProps) {
-  const hasFilter = search !== '' || categoryId !== ALL_CATEGORIES;
+  const hasFilter = search !== '' || priceMin !== '' || priceMax !== '';
 
   return (
     <Paper
@@ -65,24 +60,30 @@ function ProductsFilters({
       />
 
       <TextField
-        select
-        label="Categoria"
-        value={categoryId}
+        label="Valor minimo"
+        type="number"
+        value={priceMin}
         disabled={disabled}
-        onChange={(event) =>
-          onCategoryChange(
-            event.target.value === ALL_CATEGORIES ? ALL_CATEGORIES : Number(event.target.value),
-          )
-        }
-        sx={{ flex: '0 1 220px' }}
-      >
-        <MenuItem value={ALL_CATEGORIES}>Todas</MenuItem>
-        {categories.map((category) => (
-          <MenuItem key={category.id} value={category.id}>
-            {category.name}
-          </MenuItem>
-        ))}
-      </TextField>
+        onChange={(event) => onPriceMinChange(event.target.value)}
+        sx={{ flex: '0 1 140px' }}
+        slotProps={{
+          input: { startAdornment: <InputAdornment position="start">R$</InputAdornment> },
+          htmlInput: { min: 0, step: '0.01' },
+        }}
+      />
+
+      <TextField
+        label="Valor maximo"
+        type="number"
+        value={priceMax}
+        disabled={disabled}
+        onChange={(event) => onPriceMaxChange(event.target.value)}
+        sx={{ flex: '0 1 140px' }}
+        slotProps={{
+          input: { startAdornment: <InputAdornment position="start">R$</InputAdornment> },
+          htmlInput: { min: 0, step: '0.01' },
+        }}
+      />
 
       <Box sx={{ ml: 'auto' }}>
         <Button

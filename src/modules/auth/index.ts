@@ -16,4 +16,4 @@ export { refreshStorage } from './storage';
 
 export { default as LoginPage } from './pages/LoginPage';
 
-export type { AuthUser, Credentials, SessionStatus, UserRole } from './model/session';
+export type { AuthUser, Credentials, SessionStatus } from './model/session';

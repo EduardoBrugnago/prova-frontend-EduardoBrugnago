@@ -1,5 +1,5 @@
 export const authEndpoints = {
   login: '/auth/login',
-  profile: '/auth/profile',
-  refresh: '/auth/refresh-token',
+  profile: '/auth/me',
+  refresh: '/auth/refresh',
 } as const;

@@ -1,4 +1,4 @@
-// services/ so chama quem registra as funcoes e o app/store, 
+// services/ so chama quem registra as funcoes e o app/store,
 
 export interface AuthBridgeHandlers {
   getAccessToken: () => string | null;

@@ -24,18 +24,17 @@ function LoginForm({ onSubmit, isSubmitting = false }: LoginFormProps) {
 
   const { control, handleSubmit } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: '', password: '' },
+    defaultValues: { username: '', password: '' },
   });
 
   return (
     <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
       <Stack spacing={2.5}>
         <Input
-          name="email"
+          name="username"
           control={control}
-          label="E-mail"
-          type="email"
-          autoComplete="email"
+          label="Usuário"
+          autoComplete="username"
           fullWidth
           autoFocus
           disabled={isSubmitting}

@@ -2,7 +2,7 @@
 
 ## Introdução a abordagem
 
-Analisando as 5 partes que eram solicitadas no documento da Prova Prática, tomei a decisão de tentar fazer um projeto que unifica a **Parte 2 (Integração com APIs)** e **Parte 3 (Desenvolvimento da Interface)** e usando o planejamento pra esse projeto, responder as questões teoricas da **Parte 1 (Arquitetura de front-end)** com base nesse projeto, justificar algumas escolhas com base nele. Um exemplo é a questão `Como trataria autenticação, rotas protegidas e armazenamento do token;`, que é um ponto de arquitetura que depende do serviço, se ele ta estruturado por cookie, OAuth 2.0 ,Authorization Header (Bearer Token). Como vou usar API pública, essa escolha vai ser feita para encaixar ao serviço.
+Analisando as 5 partes que eram solicitadas no documento, tomei a decisão de tentar fazer um projeto que unifica a **Parte 2 (Integração com APIs)** e **Parte 3 (Desenvolvimento da Interface)** e usando o planejamento pra esse projeto, responder as questões teoricas da **Parte 1 (Arquitetura de front-end)** com base nesse projeto, justificar algumas escolhas com base nele. Um exemplo é a questão `Como trataria autenticação, rotas protegidas e armazenamento do token;`, que é um ponto de arquitetura que depende do serviço, se ele ta estruturado por cookie, OAuth 2.0 ,Authorization Header (Bearer Token). Como vou usar API pública, essa escolha vai ser feita para encaixar ao serviço.
 
 ## Instruções de Execução
 
@@ -98,7 +98,7 @@ Algumas coisas que eu costumo priorizar:
 
 ### Escolha das libs
 
-Como API publica escolhi a Platzi Fake Store API, ela tem disponivel Autenticação e 2 CRUDS (Produtos e Usuarios). Depois disso montei a stack seguindo oq respondi na **Parte 1**, pra mostrar a implementaçao teorica na pratica. [IA 1](#1-escolha-da-api-pública)
+Como API publica escolhi a DummyJSON, ela tem Autenticação com JWT, CRUD de produto, categoria e busca. A escolha inicial tinha sido a Platzi Fake Store API e mudou no meio da implementaçao, o motivo esta em [Troca da API publica](#troca-da-api-publica). Depois disso montei a stack seguindo oq respondi na **Parte 1**. [IA 1](#1-escolha-da-api-pública)
 
 | Pacote                                                                         | Onde entra                                                                                                                                                              |
 | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -198,15 +198,40 @@ src/
 
 ### Autenticaçao e Guard
 
-O fluxo do login e: troca a credencial por `access_token` e `refresh_token`, guarda o refresh, busca o `/auth/profile` e so entao marca a sessao como autenticada.
+O fluxo do login e: envia usuario e senha e recebe `accessToken` e `refreshToken` em `/auth/login`, guarda o refresh, busca o `/auth/me` e so entao marca a sessao como autenticada. Credencial de teste: `emilys` / `emilyspass`.
 
-| Decisao | Por que |
-| --- | --- |
-| Tres interceptors em `services/api`: anexar token, refresh com fila e normalizaçao de erro | ponto unico pra cada uma das tres coisas. E o `normalizeError` tratar as mensagens de erro |
-| Refresh com fila, e nao um refresh por chamada | evitar que 401 de multiplas chamadas pedirem refresh e o invalidar o token da proxima request, deslogando o usuario |
-| `authBridge` em vez do interceptor importar o store | o interceptor precisa do token que esta no store. Com essa ponte o `services/` nunca importe de `modules/` |
+| Decisao                                                                                    | Por que                                                                                                             |
+| ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| Tres interceptors em `services/api`: anexar token, refresh com fila e normalizaçao de erro | ponto unico pra cada uma das tres coisas. E o `normalizeError` tratar as mensagens de erro                          |
+| Refresh com fila, e nao um refresh por chamada                                             | evitar que 401 de multiplas chamadas pedirem refresh e o invalidar o token da proxima request, deslogando o usuario |
+| `authBridge` em vez do interceptor importar o store                                        | o interceptor precisa do token que esta no store. Com essa ponte o `services/` nunca importe de `modules/`          |
 
-O Guard é o `ProtectedRoute` em `app/router` - rota protegida sem sessao manda pro `/login` e o `PublicRoute` faz o contrario, devolve quem ja esta logado pra rota que tentou abrir. 
+O Guard é o `ProtectedRoute` em `app/router` - rota protegida sem sessao manda pro `/login` e o `PublicRoute` faz o contrario, devolve quem ja esta logado pra rota que tentou abrir.
+
+### Troca da API publica
+
+A escolha inicial foi a Platzi Fake Store API, e a integraçao inteira foi feita em cima dela. No meio da integraçao ao ligar o cadastro, descobri que a parte de escrita estava quebrada: `POST` e `PUT` devolvem `500 Internal server error`, inclusive testando pelo Swagger deles. Leitura e login continuam de pe, que foi justamente o que testei antes de escolher. [IA 3](#3-mapeamento-da-troca-de-api)
+
+A ressalva da DummyJSON e que ela simula escrita: `POST /products/add` volta 201 com o objeto, mas o item nao persiste. Como o enunciado pede cadastro, ediçao e exclusao funcionando na tela, resolvi com atualizaçao otimista de cache.
+
+### Redux, paginaçao e filtro
+
+Um store em `app/store`. O Redux Query gera os hooks dentro de `services/` e cuida de cache, dedupe e dos estados de carga; o estado de interface fica em slice do modulo, que hoje e o `productsFilters` em `modules/products/store` com nome, faixa de preço, ordenaçao, pagina e tamanho de pagina.
+
+A divisao entre o que vai pro servidor e o que fica no front segue o que a API sabe fazer:
+
+| Ponto           | Onde roda                       | Por que                                  |
+| --------------- | ------------------------------- | ---------------------------------------- |
+| Filtro por nome | servidor, `/products/search?q=` | e endpoint proprio da API                |
+| Ordenaçao       | servidor, `sortBy` + `order`    | a API ordena nas duas rotas de listagem  |
+| Faixa de preço  | front, em `product.rules.ts`    | a API nao tem parametro de preço         |
+| Paginaçao       | front                           | com `limit=0` o resultado ja vem inteiro |
+
+O filtro de preço e a paginaçao moram em `modules/products/model/product.rules.ts`, funçoes puras sem React (**Parte 1**). A categoria continua sendo carregada pelo modulo `categories`, mas so pra alimentar o formulario e o nome que aparece na tabela.
+
+**Atualizaçao otimista na ediçao e na exclusao.** Como a API simula escrita, nenhuma das tres mutations invalida tag pra nao disparar um refetch que traria a lista original e desfaria o que o usuario acabou de fazer. Ediçao e exclusao aplicam o resultado direto no cache do Redux Query, e desfazem o patch se a request falhar. Como filtro e ordenaçao viram entradas de cache diferentes, o patch e aplicado em todas as ja buscadas.
+
+O cadastro ficou de fora, o `POST` sai de verdade e a API responde 201, mas o produto nao existe no server.Optei por retornar so com o toast de sucesso, pra nao gerar confusao na listagem e ediçao.
 
 ## Uso de IA
 
@@ -262,3 +287,18 @@ essa árvore, com foco em leitura e apenas com: bloco de código, indentação.
 ```
 
 O retorno é o bloco da seção [Estrutura de pastas](#estrutura-de-pastas). Conferi as pasta e adicionei alguns comentarios nelas pra ficar facil de compreender.
+
+### 3. Mapeamento da troca de API
+
+Durante a integraçao descobrir que POST/PUT da Platzi tava com erro, precisava saber o peso de trocar de API antes de decidir. Prompt que usei:
+
+```
+Tenho uma aplicaçao React integrada com a Platzi Fake Store API, dividida em
+services/ (client axios, DTO e RTK Query), modules/ (model, mapper, hooks, store)
+e generic/ (componentes e tema).
+
+Considerando a DummyJSON(https://dummyjson.com/docs) como substituta, lista o que precisa mudar em cada camada,
+quais arquivos ficam intactos, e onde os contratos das duas APIs divergem.
+```
+
+O retorno virou a lista de arquivos e a estimativa que usei pra decidir. Antes de escrever qualquer DTO eu bati todos os contratos com `curl`. Duas coisas que so apareceram nesse teste e nao estavam no retorno: credencial errada volta 400 em vez de 401, e busca e categoria sao endpoints que nao combinam.
