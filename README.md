@@ -6,6 +6,28 @@ Analisando as 5 partes que eram solicitadas no documento, tomei a decisão de te
 
 ## Instruções de Execução
 
+
+### Docker
+
+```bash
+docker compose up --build
+```
+
+Sobe em `http://localhost:8080`. O `Dockerfile` e multi-stage: um estagio com Node
+compila o projeto e o outro serve o `dist/` estatico com nginx, entao a imagem final
+nao carrega Node nem `node_modules`.
+
+Dois detalhes que valem saber:
+
+- A `VITE_API_URL` entra como **build arg**, nao como variavel de runtime. O Vite
+  embute o valor no bundle na hora do build, entao trocar a URL exige rebuild
+  (`VITE_API_URL=... docker compose up --build`).
+- O `nginx.conf` faz `try_files ... /index.html`. Sem isso, dar F5 direto em
+  `/products` devolveria 404, porque quem conhece a rota e o React Router, nao o servidor.
+
+
+### Local
+
 Requer **Node 20.19+ ou 22.12+**. Desenvolvido no Node 24.
 
 ```bash
@@ -27,6 +49,7 @@ A aplicaçao sobe em `http://localhost:5173` e abre no login, porque `/products`
 | `npm run format`  | Prettier em tudo                                |
 
 A unica variavel de ambiente e a `VITE_API_URL`, que aponta pra `https://dummyjson.com`. O `.env.local` fica fora do versionamento, por isso o `.env.example` versionado e o fallback em `app/config/env.ts` — sem nenhum dos dois o projeto ainda sobe. [IA 4](#4-instruções-de-execução)
+
 
 ## Parte 1: Arquitetura de front-end
 
@@ -289,7 +312,8 @@ Acho que Code Review é uma prática essencial, principalmente para qualidade. P
 
 ### Questão 6
 
-**Repositório principal:** [https://codigos.ufsc.br/loc/cassie](https://codigos.ufsc.br/loc/cassie)
+**Repositório:** [https://codigos.ufsc.br/loc/cassie](https://codigos.ufsc.br/loc/cassie)
+
 **Equipe:** [https://cassiecore.paginas.ufsc.br/equipe-atual/](https://cassiecore.paginas.ufsc.br/equipe-atual/)
 
 ### Sobre o projeto: CASSIE CoRe®
@@ -329,7 +353,7 @@ Alem disso o codigo era muito denso e nao separava funçao pura de interface, de
 
 ## Uso de IA
 
-Uso IA como ferramenta de apoio, principalmente pra levantar opção e acelerar pesquisa, mas a decisão e a justificativa continuam sendo minhas, todo retorno que usei aqui eu validei antes de adotar. Abaixo o registro dos pontos onde usei durante a prova. Cada uso está numerado aqui embaixo e marcado com `[IA n]` no ponto do README onde ele entrou.
+Uso IA como ferramenta de apoio, principalmente pra levantar opção e acelerar pesquisa, mas a decisão e a justificativa continuam sendo minhas, todo retorno que usei aqui eu validei antes de adotar. Abaixo o registro dos pontos onde usei durante a prova.
 
 ### 1. Escolha da API pública
 
